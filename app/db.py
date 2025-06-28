@@ -20,13 +20,14 @@ def get_connection():
     except Exception as e:
         print(f"Erreur : {e}")
 
-# Création de la table (une fois)
+# Création de la table
 def create_table():
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("""
         CREATE TABLE IF NOT EXISTS resultat (
             id SERIAL PRIMARY KEY,
+            nom TEXT,
             matching_score FLOAT,
             label_section TEXT,
             recommendation TEXT,
@@ -41,10 +42,10 @@ def create_table():
 def save_result(result):
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("""
-        INSERT INTO resultat (matching_score, label_section, recommendation, timestamp)
-        VALUES (%s, %s, %s, %s)
-    """, (
+    cur.execute(
+        """INSERT INTO resultat (nom, matching_score, label_section, recommendation, timestamp)
+        VALUES (%s, %s, %s, %s, %s) """, (
+        result.get("nom", "Inconnu"),
         result["matching_score"],
         result["label_section"],
         result["recommendation"],
