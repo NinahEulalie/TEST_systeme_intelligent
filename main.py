@@ -82,46 +82,58 @@ batch_input_type = st.radio(
     key="batch_input_type"
 )
 
+# === PDF MULTIPLES ===
 if batch_input_type == "PDF (plusieurs fichiers)":
     uploaded_pdfs = st.file_uploader("Uploader plusieurs fichiers PDF", type=["pdf"], accept_multiple_files=True)
     if uploaded_pdfs:
         all_cv_texts = [extract_text_from_pdf(pdf) for pdf in uploaded_pdfs]
         st.success("Texte extrait avec succès.")
-        st.text_area("Texte extrait des CV", all_cv_texts, height=400)
+        st.text_area("Texte extrait des CV", "\n\n---\n\n".join(all_cv_texts), height=400)  # affichage propre
+
         if st.button("Analyser le lot de CVs"):
             batch_results = process_batch(all_cv_texts, offer_text, job_level, sector)
             st.success(f"{len(batch_results)} CVs analysés.")
+            
             for i, res in enumerate(batch_results, 1):
                 with st.expander(f"CV PDF #{i}"):
                     st.json(res)
-            # Après analyse
-            save_result(batch_results)
-            #Téléchargement sf JSON
+
+            # Sauvegarde en base : un par un
+            for result in batch_results:
+                save_result(result)
+
+            # Téléchargement groupé JSON
             json_result = json.dumps(batch_results, ensure_ascii=False, indent=2)
             st.download_button(
-                label="Télécharger le résultat",
+                label="Télécharger tous les résultats",
                 data=json_result,
-                file_name="resultat_analyse_cv.json",
+                file_name="resultats_analyse_batch.json",
                 mime="application/json"
             )
 
+# === TEXTE MULTIPLE ===
 else:
     uploaded_txt = st.file_uploader("Uploader un fichier texte brut contenant plusieurs CVs (1 par ligne)", type=["txt"])
     if uploaded_txt and st.button("Analyser le fichier texte"):
         content = uploaded_txt.read().decode("utf-8")
         cvs = [line.strip() for line in content.strip().split("\n") if line.strip()]
+
         batch_results = process_batch(cvs, offer_text, job_level, sector)
         st.success(f"{len(batch_results)} CVs analysés.")
+
         for i, res in enumerate(batch_results, 1):
             with st.expander(f"CV texte #{i}"):
                 st.json(res)
-        # Après analyse
-        save_result(batch_results)
-        #Téléchargement sf JSON
+
+        # Sauvegarde en base : un par un
+        for result in batch_results:
+            save_result(result)
+
+        # Téléchargement JSON
         json_result = json.dumps(batch_results, ensure_ascii=False, indent=2)
         st.download_button(
-            label="Télécharger le résultat",
+            label="Télécharger tous les résultats",
             data=json_result,
-            file_name="resultat_analyse_cv.json",
+            file_name="resultats_analyse_batch.json",
             mime="application/json"
         )
