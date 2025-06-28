@@ -44,9 +44,6 @@ def process_application(cv_text, offer_text, job_level, sector):
         "matching_score": score,
         "label_section": label,
         "recommendation": rec,
-        "job_level": job_level,
-        "sector": sector,
-        "timestamp": datetime.datetime.now().isoformat()
     }
     return result
 
