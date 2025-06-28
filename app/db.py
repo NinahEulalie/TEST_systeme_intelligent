@@ -6,7 +6,7 @@ DB_CONFIG = {
     "host": "localhost",
     "database": "systeme_intelligent",
     "user": "postgres",
-    "password": "Bora16hae",
+    "password": "pswd",
     "port": 5432
 }
 
